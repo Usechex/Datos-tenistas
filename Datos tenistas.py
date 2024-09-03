@@ -1,3 +1,4 @@
+#Codigo Base de datos tenistas
 def es_numero(valor):# Defino tipo de variable float solo altura para estatura 
         try:
             float(valor)
@@ -86,6 +87,7 @@ def eliminar_jugadores(jugadores): # Para eliminar los jugadores
 
 def menu ():
     jugadores = []
+    print("Bienvenido al sistema de gestión de jugadores de tenis.")
     while True:
         print("\n--------menu-----")
         print("1. Registrar jugador")
