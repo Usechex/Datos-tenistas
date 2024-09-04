@@ -1,114 +1,82 @@
-#Codigo Base de datos tenistas
-def es_numero(valor):# Defino tipo de variable float solo altura para estatura 
-        try:
-            float(valor)
-            return True 
-        except ValueError:
-            return False
- #Defino registro del jugador 
+from flask import Flask,request
+from flask_cors import CORS
 
-def registrar_jugador ():   
-    while True: 
-        Nombre = input("Ingrese Nombre del juegador de tennis ")
-        if Nombre.isalpha():
-                break
-        else:
-                print("Ingrese solo el nombre del jugador")
-                
-    
-    while True:
-        edad = ((input)("Ingrese la edad del jugador "))
-        if edad.isdigit():
-            edad = int(edad)
-            break
-        else:
-                print("Ingrese solo la edad del jugador")
-            
-            
-    while True:        
-        Estatura = ((input)("ingrese la estatura del jugador "))
-        if es_numero(Estatura):
-                Estatura = float(Estatura)
-                break
-        else:
-                print("Ingrese solo la estatura")
-                
-    
-    return{"Nombre":Nombre,"edad":edad,"Estatura":Estatura}
-    
-# Defino mostar jugadores 
+app=Flask(_name_)
+CORS(app)
 
-def mostrar_jugadores(jugadores):
+jugadores=[{
+"nombre":"juan",
+"edad":20,
+"estatura":180
+}]
+
+@app.route('/insertar', methods = ['POST'])
+def registrar_jugador ():
+
+    jugador = request.get_json()
+    print(jugador)
+
+    jugadores.append({
+            "nombre":jugador["nombre"],
+            "edad":jugador["edad"],
+            "estatura":jugador["estatura"]
+    })
+    return jugadores
+
+# Defino mostar jugadores
+
+@app.route('/buscar', methods = ['GET'])
+def mostrar_jugadores():
+    result=[]
+
     if not jugadores:
-        print("no hay jugadores registrados ")  
-        return
-        
-    for i, jugador in enumerate(jugadores, start=1):
-     print(f"\njugador {i}")
-     print(f"Nombre: {jugador['Nombre']}")
-     print(f"edad: {jugador['edad']}")
-     print (f"Estatura {jugador['Estatura']}")
-     
-# para actualizar los jugadores 
-def actualizar_jugadores(jugadores):
-    mostrar_jugadores(jugadores)
-    if not  jugadores:
-        return 
-    try: 
-        num = int(input("\ningrese el numero del jugador que quiere actualizar:"))
-        jugador = jugadores[num-1]
-        print("\n Actualizando jugador:")
-        for key in jugador :
-            nuevo_valor = input(f"ingrese nuevo valor para {key} (presione enter para mantener {jugador[key]}):")
-            if nuevo_valor :
-                if key =="Nombre" and nuevo_valor.isalpha():
-                    jugador[key] = nuevo_valor
-                elif key == "edad" and nuevo_valor.isdigit():
-                    jugador[key] = int(nuevo_valor)
-                elif key =="Estatura" and es_numero(nuevo_valor):   
-                    jugador[key] = float(nuevo_valor)
-                else:
-                    print(f"valor invalido para {key}. no se actualizo")
-    except (IndexError, ValueError):
-        print("Numero de jugador no valido")
+        print("no hay jugadores registrados ")
+        return {"error":"no hay jugadores registrados "}
     
-def eliminar_jugadores(jugadores): # Para eliminar los jugadores 
-    mostrar_jugadores(jugadores)
-    if not jugadores:
-        return
-    
-    try:
-        num=int(input("\nIngrese el numero del jugador que quiere eliminar: "))
-        jugadores.pop(num- 1)
-        print("jugador eliminador.")
-    except(IndexError, ValueError):
-        print("numero de jugador no valido.")
-    
+    for element in jugadores:
+        result.append({
+            "name":element["nombre"],
+            "age":element["edad"],
+            "high":element["estatura"]
+        })
+    return result
 
-def menu ():
-    jugadores = []
-    print("Bienvenido al sistema de gestión de jugadores de tenis.")
-    while True:
-        print("\n--------menu-----")
-        print("1. Registrar jugador")
-        print("2. Mostrar jugadores")
-        print("3. Actualizar jugadores")
-        print("4. Eliminar jugador")
-        print("5. Volver ")
-        opcion = input("seleccione una opcion ")
-        
-        if opcion == "1":
-            jugadores.append(registrar_jugador())
-        elif opcion == "2":
-            mostrar_jugadores(jugadores)
-        elif opcion =="3":
-            actualizar_jugadores(jugadores)
-        elif opcion == "4":
-            eliminar_jugadores(jugadores)
-        elif opcion =="5":
-            print("saliendo del programa...")
-            break
-        else:
-            print("opcion no valida vuelva a intentar porfavor")
 
-menu()
+@app.route('/actualizar', methods = ['PUT'])
+def actualizar_jugadores():
+    opcion = request.get_json()
+    print (opcion)
+
+    for element in jugadores:       
+        if opcion["nombre"]==element["nombre"]:
+       
+            if opcion["parametro"]=="edad":
+                element["edad"]=opcion["cambio"]
+            
+            elif opcion["parametro"]=="estatura":
+                element["estatura"]=opcion["cambio"]
+
+    return jugadores
+
+
+@app.route('/eliminar', methods = ['DELETE'])
+def eliminar_jugadores():
+    borrar=False
+    opcion = request.get_json()
+    print (opcion)
+
+    for element in jugadores:       
+        if opcion["nombre"]==element["nombre"]:
+            borrar=True
+
+    if borrar == True:
+        jugadores.pop(element["nombre"])
+        jugadores.pop(element["edad"])
+        jugadores.pop(element["estatura"])
+        borrar=False    
+        
+    return jugadores   
+
+
+if _name_ == '_main_':
+    app.run(host="0.0.0.0",port=5000,debug=False)
