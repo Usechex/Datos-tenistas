@@ -1,82 +1,71 @@
-from flask import Flask,request
+from flask import Flask, request
 from flask_cors import CORS
 
-app=Flask(_name_)
+app = Flask(__name__)
 CORS(app)
 
-jugadores=[{
-"nombre":"juan",
-"edad":20,
-"estatura":180
+jugadores = [{
+    "nombre": "juan",
+    "edad": 20,
+    "altura": 180
 }]
 
-@app.route('/insertar', methods = ['POST'])
-def registrar_jugador ():
 
+@app.route('/insertar', methods=['POST'])
+def registrar_jugador():
     jugador = request.get_json()
     print(jugador)
 
     jugadores.append({
-            "nombre":jugador["nombre"],
-            "edad":jugador["edad"],
-            "estatura":jugador["estatura"]
+        "nombre": jugador["nombre"],
+        "edad": jugador["edad"],
+        "altura": jugador["estatura"] 
     })
-    return jugadores
+    return {"message": "Jugador registrado", "jugadores": jugadores}
 
-# Defino mostar jugadores
 
-@app.route('/buscar', methods = ['GET'])
+@app.route('/buscar', methods=['GET'])
 def mostrar_jugadores():
-    result=[]
-
     if not jugadores:
-        print("no hay jugadores registrados ")
-        return {"error":"no hay jugadores registrados "}
-    
+        return {"error": "No hay jugadores registrados"}, 404
+
+    result = []
     for element in jugadores:
         result.append({
-            "name":element["nombre"],
-            "age":element["edad"],
-            "high":element["estatura"]
+            "nombre": element["nombre"],
+            "edad": element["edad"],
+            "altura": element["altura"]
         })
-    return result
+    return {"jugadores": result}
 
 
-@app.route('/actualizar', methods = ['PUT'])
+@app.route('/actualizar', methods=['PUT'])
 def actualizar_jugadores():
     opcion = request.get_json()
-    print (opcion)
+    print(opcion)
 
-    for element in jugadores:       
-        if opcion["nombre"]==element["nombre"]:
-       
-            if opcion["parametro"]=="edad":
-                element["edad"]=opcion["cambio"]
-            
-            elif opcion["parametro"]=="estatura":
-                element["estatura"]=opcion["cambio"]
+    for element in jugadores:
+        if opcion["nombre"] == element["nombre"]:
+            if opcion["parametro"] == "edad":
+                element["edad"] = opcion["cambio"]
+            elif opcion["parametro"] == "altura":
+                element["altura"] = opcion["cambio"]
 
-    return jugadores
+    return {"message": "Jugador actualizado", "jugadores": jugadores}
 
 
-@app.route('/eliminar', methods = ['DELETE'])
+@app.route('/eliminar', methods=['DELETE'])
 def eliminar_jugadores():
-    borrar=False
     opcion = request.get_json()
-    print (opcion)
+    print(opcion)
 
-    for element in jugadores:       
-        if opcion["nombre"]==element["nombre"]:
-            borrar=True
+    for i, element in enumerate(jugadores):
+        if opcion["nombre"] == element["nombre"]:
+            jugadores.pop(i)
+            return {"message": "Jugador eliminado", "jugadores": jugadores}
 
-    if borrar == True:
-        jugadores.pop(element["nombre"])
-        jugadores.pop(element["edad"])
-        jugadores.pop(element["estatura"])
-        borrar=False    
-        
-    return jugadores   
+    return {"error": "Jugador no encontrado"}, 404
 
 
-if _name_ == '_main_':
-    app.run(host="0.0.0.0",port=5000,debug=False)
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=5000, debug=False)
